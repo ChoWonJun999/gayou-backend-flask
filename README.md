@@ -4,7 +4,7 @@ Flask와 React를 사용한 웹 애플리케이션 프로젝트
 
 ## 개요
 
-이 프로젝트는 Python의 Flask를 백엔드로, React를 프론트엔드로 사용하는 웹 애플리케이션입니다. Flask는 REST API를 제공하며, React는 사용자 인터페이스를 구축합니다. Flask는 MySQL 데이터베이스와 통합되어 데이터 CRUD(Create, Read, Update, Delete) 기능을 지원합니다.
+이 프로젝트는 Python의 Flask를 사용하여 RESTful API를 제공하는 백엔드 애플리케이션입니다. Flask는 MySQL 데이터베이스와 통합되어 데이터 CRUD(Create, Read, Update, Delete) 기능을 지원합니다. 또한 `APScheduler`를 사용하여 주기적으로 공공 데이터 API에서 데이터를 수집하는 기능을 포함하고 있습니다.
 
 ## 주요 기능
 
