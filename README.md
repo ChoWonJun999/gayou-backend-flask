@@ -18,7 +18,7 @@ Flask와 React를 사용한 웹 애플리케이션 프로젝트
 
 ### 사전 요구 사항
 
-- Python 3.12
+- Python 3.8
 - Node.js 및 npm
 - MySQL 데이터베이스
 
