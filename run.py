@@ -37,17 +37,16 @@ def main():
         logger.error(traceback.format_exc())
     finally:
         # 서버 종료 시 스케줄러 중지
-        if os.getenv('WERKZEUG_RUN_MAIN') == 'true' and is_scheduler_running():
+        if is_scheduler_running():
             stop_scheduler()
             logger.info('Flask application has stopped.')
 
 if __name__ == '__main__':
     # 스케줄러가 실행 중인지 확인하고, 메인 스레드에서만 실행
-    if os.getenv('WERKZEUG_RUN_MAIN') == 'true':
-        if not is_scheduler_running():
-            start_scheduler()
-            logger.info('Scheduler started in main process.')
-        else:
-            logger.info('Scheduler is already running or not in the main thread.')
+    if not is_scheduler_running():
+        start_scheduler()
+        logger.info('Scheduler started in main process.')
+    else:
+        logger.info('Scheduler is already running or not in the main thread.')
 
     main()

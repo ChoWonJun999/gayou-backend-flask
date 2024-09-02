@@ -34,11 +34,9 @@ def create_app():
         create_table()
         logger.info('Database table created successfully.')
 
-        # 스케줄러를 메인 스레드에서만 시작
-        if not app.debug or os.getenv('WERKZEUG_RUN_MAIN') == 'true':
-            logger.info('Starting scheduler...')
-            start_scheduler()
-            logger.info('Scheduler started.')
+        logger.info('Starting scheduler...')
+        start_scheduler()
+        logger.info('Scheduler started.')
 
         # 라우트 초기화
         logger.info('Initializing routes...')

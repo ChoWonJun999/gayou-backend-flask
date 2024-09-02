@@ -1,4 +1,6 @@
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.blocking import BlockingScheduler
+from datetime import datetime
 from .data_collector import collect_data
 from ..logging import setup_logging
 
@@ -10,7 +12,14 @@ scheduler = BackgroundScheduler()
 is_scheduler_running_flag = False  # 스케줄러 실행 상태를 저장하는 변수
 
 # 스케줄러 작업 추가
-scheduler.add_job(collect_data, 'interval', weeks=1, id='collect_data_job')
+scheduler.add_job(
+    collect_data,
+    'interval',
+    weeks=1,
+    id='collect_data_job',
+    max_instances=1,
+    next_run_time=datetime.now()
+)
 
 def start_scheduler():
     """스케줄러 시작 함수."""
