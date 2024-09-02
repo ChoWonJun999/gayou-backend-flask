@@ -37,7 +37,7 @@ Flask와 React를 사용한 웹 애플리케이션 프로젝트
  pip install -r requirements.txt
 ```
 
-**환경 변수 설정**
+**환경 변수 설정(.env)**
 
 ```makefile
  FLASK_ENV=development
