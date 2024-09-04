@@ -1,5 +1,3 @@
-# app/scheduler/data_collector.py
-
 import requests
 import xmltodict
 import pandas as pd
@@ -32,8 +30,8 @@ def fetch_area_based_data(service_key, base_url):
             'serviceKey': service_key,
             'pageNo': page_no,
             'numOfRows': 1000,
-            'MobileOS': 'ETC',
-            'MobileApp': 'AppTest',
+            'MobileOS': 'WIN',
+            'MobileApp': 'gayou',
             'arrange': 'A',
             'areaCode': 3,
             '_type': 'xml'
@@ -94,7 +92,7 @@ def fetch_additional_overview(service_key, base_url, df):
             'serviceKey': service_key,
             'contentId': content_id,
             'MobileOS': 'WIN',
-            'MobileApp': 'WebTest',
+            'MobileApp': 'gayou',
             'defaultYN': 'Y',
             'firstImageYN': 'Y',
             'areacodeYN': 'Y',
@@ -105,7 +103,7 @@ def fetch_additional_overview(service_key, base_url, df):
 
         try:
             response = requests.get(f"{base_url}/detailCommon1", params=params)
-            response.raise_for_status()
+            logger.error(response)
         except requests.RequestException as e:
             logger.error(f"Failed to fetch overview for content ID {content_id}: {e}")
             continue
@@ -117,7 +115,7 @@ def fetch_additional_overview(service_key, base_url, df):
                 'overview': item.find('overview').text if item.find('overview') is not None else None,
             }
             data_list.append(data)
-
+    
     return pd.DataFrame(data_list)
 
 
@@ -138,6 +136,15 @@ def collect_data():
     overviews = fetch_additional_overview(Config.SERVICE_KEY, Config.BASE_URL, df)
     if not overviews.empty:
         df = pd.merge(df, overviews, on='contentid', how='left')
+        # 주소
+        df['addr1'] = df['addr1'].fillna('정보 없음')
+        df['addr2'] = df['addr2'].fillna('정보 없음')
+
+        # 이미지
+        df['firstimage'] = df['firstimage'].fillna('이미지 미제공')
+        df['firstimage2'] = df['firstimage2'].fillna('이미지 미제공')
+
+        df['overview'] = df['overview'].fillna('정보 미제공')
 
     # 3. 데이터 저장
     try:
@@ -145,5 +152,7 @@ def collect_data():
         logger.info("Data successfully saved to the database.")
     except Exception as e:
         logger.error(f"Failed to save data to the database: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
 
     logger.info("Data collection process completed.")

@@ -40,9 +40,24 @@ def save_to_db(df):
         cursor = conn.cursor()
         for index, row in df.iterrows():
             cursor.execute(INSERT_OR_UPDATE_PLACE, (
-                row['contentid'], row.get('title', None), row.get('addr1', None), row.get('areacode', None),
-                row.get('cat1', None), row.get('cat2', None), row.get('cat3', None),
-                row.get('mapx', None), row.get('mapy', None), row.get('overview', None), row.get('last_updated', None)
+                row['contentid'],
+                row.get('title', None),
+                row.get('addr1', None),
+                row.get('addr2', None),
+                row.get('areacode', None),
+                row.get('booktour', None),
+                row.get('cat1', None),
+                row.get('cat2', None),
+                row.get('cat3', None),
+                row.get('contenttypeid', None),
+                row.get('createdtime', None),
+                row.get('firstimage', None),
+                row.get('firstimage2', None),
+                row.get('mapx', None),
+                row.get('mapy', None),
+                row.get('modifiedtime', None),
+                row.get('tel', None),
+                row.get('overview', None)
             ))
         conn.commit()
         cursor.close()

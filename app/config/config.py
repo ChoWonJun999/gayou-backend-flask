@@ -26,6 +26,7 @@ class Config:
     WERKZEUG_RUN_MAIN = os.getenv('WERKZEUG_RUN_MAIN', 'true')
 
     # 스케줄러 설정
+    JOB_RUN = False
     JOBS = [
         {
             'id': 'job1',
