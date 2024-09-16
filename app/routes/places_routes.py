@@ -20,7 +20,7 @@ def get_places():
             logger.info("Successfully fetched all places.")
             content = {
                 'town':'동네 이름',
-                'courseTite':'계족산에서 힐링 한 바가지 두 바가지',
+                'courseName':'계족산에서 힐링 한 바가지 두 바가지',
                 'day': 2,
                 'data':  result,
             }
