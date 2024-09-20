@@ -10,7 +10,7 @@ class Config:
 
     """기본 설정"""
     DEBUG = True
-    TESTING = False
+    TESTING = True
 
     # 공공데이터 API 설정
     BASE_URL = "http://apis.data.go.kr/B551011/KorService1"
@@ -26,7 +26,7 @@ class Config:
     DB_NAME = os.getenv('DB_NAME', 'gayou')
 
     # Flask 설정
-    WERKZEUG_RUN_MAIN = os.getenv('WERKZEUG_RUN_MAIN', False)
+    WERKZEUG_RUN_MAIN = os.getenv('WERKZEUG_RUN_MAIN', True)
 
     # 스케줄러 설정
     JOB_RUN = False
