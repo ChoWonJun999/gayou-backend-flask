@@ -4,12 +4,14 @@ from datetime import datetime
 from .data_collector import collect_data
 from ..logging import setup_logging
 
+from ..config.config import Config
+
 # 로그 설정
 logger = setup_logging()
 
 # 스케줄러 인스턴스 생성
 scheduler = BackgroundScheduler()
-is_scheduler_running_flag = False  # 스케줄러 실행 상태를 저장하는 변수
+is_scheduler_running_flag = not Config.WERKZEUG_RUN_MAIN  # 스케줄러 실행 상태를 저장하는 변수
 
 # 스케줄러 작업 추가
 scheduler.add_job(
