@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
 from ..db import execute_query
+from ..db.queries import SELECT_ALL_PLACES
 from ..logging import setup_logging
 from ..db.queries import *
 
@@ -11,7 +12,7 @@ import pandas as pd
 logger = setup_logging()
 
 # 블루프린트 설정
-places_bp = Blueprint('places', __name__)
+places_bp = Blueprint('route/locations', __name__)
 
 '''
 테스트 용 
@@ -133,16 +134,23 @@ def recommend_places():
 #         return jsonify({'message': f'Request Error: {e}'}), 500
     
 # 모든 장소 조회
+
 @places_bp.route('/', methods=['GET'])
 def get_places():
     """
-    모든 장소 데이터를 조회하는 엔드포인트.
+    추천 코스 데이터를 조회하는 엔드포인트.
     """
     try:
         result = execute_query(SELECT_ALL_PLACES)
         if result is not None:
             logger.info("Successfully fetched all places.")
-            return jsonify(result), 200
+            content = {
+                'town':'동네 이름',
+                'courseName':'계족산에서 힐링 한 바가지 두 바가지',
+                'day': 2,
+                'data':  result,
+            }
+            return jsonify(content), 200
         else:
             logger.error("Failed to fetch places.")
             return jsonify({"error": "Failed to fetch places"}), 500
@@ -150,7 +158,11 @@ def get_places():
         logger.error(f"Error in /places route: {e}")
         return jsonify({"error": str(e)}), 500
 
-# 특정 장소 조회
+
+
+
+
+
 @places_bp.route('/<contentid>', methods=['GET'])
 def get_place(contentid):
     """
@@ -169,7 +181,6 @@ def get_place(contentid):
         logger.error(f"Error in /places/{contentid} route: {e}")
         return jsonify({"error": str(e)}), 500
 
-# 장소 추가
 @places_bp.route('/', methods=['POST'])
 def add_place():
     """
@@ -192,7 +203,6 @@ def add_place():
         logger.error(f"Error in POST /places route: {e}")
         return jsonify({"error": str(e)}), 500
 
-# 장소 삭제
 @places_bp.route('/<contentid>', methods=['DELETE'])
 def delete_place(contentid):
     """

@@ -44,18 +44,23 @@ def save_to_db(df):
                 row['contentid'],
                 row.get('title', None),
                 row.get('addr1', None),
+                row.get('addr2', None),
                 row.get('areacode', None),
+                row.get('booktour', None),
                 row.get('cat1', None),
                 row.get('cat2', None),
                 row.get('cat3', None),
+                row.get('contenttypeid', None),
+                row.get('createdtime', None),
+                row.get('firstimage', None),
+                row.get('firstimage2', None),
                 row.get('mapx', None),
                 row.get('mapy', None),
+                row.get('modifiedtime', None),
+                row.get('tel', None),
                 row.get('overview', None),
-                datetime.now()  # 현재 시간을 last_updated에 추가
-                # 기존 버전과의 차이점:
-                # 기존 코드는 row.get('last_updated', None)으로 데이터프레임에서 가져온 값을 사용.
-                # 1번 방법은 항상 현재 시간(datetime.now())을 저장하여,
-                # DB에 저장되는 시점을 기록하도록 변경됨.
+                row.get('overview_summary', None),
+                row.get('combined_text', None)
             ))
         conn.commit()  # 데이터베이스에 변경 사항 커밋
         cursor.close()  # 커서 닫기

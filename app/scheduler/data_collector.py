@@ -5,6 +5,7 @@ import pandas as pd
 import xml.etree.ElementTree as ET
 import openai
 import re
+from datetime import datetime
 from ..db import save_to_db
 from ..config.config import Config
 from ..logging import setup_logging
@@ -38,8 +39,8 @@ def fetch_area_based_data(service_key, base_url):
             'serviceKey': service_key,
             'pageNo': page_no,
             'numOfRows': 1000,  # 한 번에 가져올 데이터 수
-            'MobileOS': 'ETC',
-            'MobileApp': 'AppTest',
+            'MobileOS': 'WIN',
+            'MobileApp': 'WebTest',
             'arrange': 'A',  # 데이터 정렬 기준
             'areaCode': 3,
             '_type': 'xml'  # 응답 형식

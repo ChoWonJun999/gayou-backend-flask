@@ -6,6 +6,7 @@ from .logging import setup_logging
 from .routes import init_routes
 from .scheduler import start_scheduler, stop_scheduler, is_scheduler_running
 import os
+from .config.config import Config
 
 def create_app():
     """
@@ -34,9 +35,10 @@ def create_app():
         create_table()
         logger.info('Database table created successfully.')
 
-        logger.info('Starting scheduler...')
-        start_scheduler()
-        logger.info('Scheduler started.')
+        if Config.JOB_RUN:
+            logger.info('Starting scheduler...')
+            start_scheduler()
+            logger.info('Scheduler started.')
 
         # 라우트 초기화
         logger.info('Initializing routes...')
