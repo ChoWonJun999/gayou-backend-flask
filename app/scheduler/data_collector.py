@@ -1,3 +1,4 @@
+import re
 import requests
 import xmltodict
 import pandas as pd
@@ -8,6 +9,10 @@ from ..logging import setup_logging
 
 # 로그 설정
 logger = setup_logging()
+
+re_special_chars = re.compile(r'[^a-z0-9가-힣\s]')
+re_multiple_spaces = re.compile(r'\s+')
+
 
 def fetch_area_based_data(service_key, base_url):
     """
@@ -34,6 +39,7 @@ def fetch_area_based_data(service_key, base_url):
             'MobileApp': 'gayou',
             'arrange': 'A',
             'areaCode': 3,
+            # '_type': 'json'
             '_type': 'xml'
         }
 
@@ -44,6 +50,7 @@ def fetch_area_based_data(service_key, base_url):
             logger.error(f"Failed to fetch data from areaBasedList1 API: {e}")
             break
 
+        # data_dict = response.json()
         data_dict = xmltodict.parse(response.text)
         items = data_dict.get('response', {}).get('body', {}).get('items', {}).get('item')
 
@@ -63,7 +70,7 @@ def fetch_area_based_data(service_key, base_url):
         else:
             logger.warning("No more data available or response format changed.")
             break
-
+        
     if not all_items:
         logger.warning("No data collected from areaBasedList1 API.")
         return pd.DataFrame()  # 빈 데이터프레임 반환
@@ -93,31 +100,128 @@ def fetch_additional_overview(service_key, base_url, df):
             'contentId': content_id,
             'MobileOS': 'WIN',
             'MobileApp': 'gayou',
-            'defaultYN': 'Y',
-            'firstImageYN': 'Y',
-            'areacodeYN': 'Y',
-            'catcodeYN': 'Y',
             'overviewYN': 'Y',
-            '_type': 'xml'
+            '_type': 'json'
         }
 
         try:
             response = requests.get(f"{base_url}/detailCommon1", params=params)
-            logger.error(response)
+            response.raise_for_status()  # HTTP 에러 처리
+
+            # 상태 코드가 200이 아니면 오류 기록
+            if response.status_code != 200:
+                logger.error(f"Failed to fetch overview for content ID {content_id}. Status code: {response.status_code}")
+                continue
+
+            # 응답 내용이 비어있을 경우 예외 처리
+            try:
+                data_dict = response.json()
+            except ValueError:
+                logger.error(f"Failed to parse JSON for content ID {content_id}. Response: {response.text}")
+                continue
+
+            items = data_dict.get('response', {}).get('body', {}).get('items', {}).get('item')
+
+            if items:
+                if isinstance(items, dict):  # 단일 항목일 경우
+                    items = [items]
+                for item in items:
+                    data = {
+                        'contentid': item['contentid'],
+                        'overview': item.get('overview', None)
+                    }
+                    data_list.append(data)
         except requests.RequestException as e:
             logger.error(f"Failed to fetch overview for content ID {content_id}: {e}")
             continue
-
-        root = ET.fromstring(response.content)
-        for item in root.iter('item'):
-            data = {
-                'contentid': item.find('contentid').text,
-                'overview': item.find('overview').text if item.find('overview') is not None else None,
-            }
-            data_list.append(data)
     
     return pd.DataFrame(data_list)
 
+
+def process_data(df):
+    """
+    데이터를 전처리하는 함수. 데이터베이스에서 places_info 테이블을 불러와 전처리한 후, places 테이블에 저장.
+    
+    Returns:
+        DataFrame: 전처리된 데이터프레임.
+    """
+    try:
+        # 매핑
+        sigunguCode_mapping = {1: '대덕구', 2: '동구', 3: '서구', 4: '유성구', 5: '중구'}
+        contenttypeid_mapping = {
+            12: '관광지',
+            14: '문화시설',
+            15: '축제공연행사',
+            25: '여행코스',
+            28: '레포츠',
+            32: '숙박',
+            38: '쇼핑',
+            39: '음식점'
+        }
+        cpyrhtDivCd_mapping = {
+            'Type1': '제1유형, 출처표시-권장',
+            'Type3': '제1유형 + 변경금지',
+        }
+
+        # 매핑 적용
+        df['cpyrhtDivCd'] = df['cpyrhtDivCd'].map(cpyrhtDivCd_mapping)
+        df['sigungucode'] = df['sigungucode'].map(sigunguCode_mapping)
+        df['contenttypeid'] = df['contenttypeid'].map(contenttypeid_mapping)
+
+        # 엑셀 파일 병합
+        classification_df = pd.read_excel('./한국관광공사_국문_서비스분류코드_v4.2.xlsx', header=4).iloc[:, 1:]
+        classification_df.columns = ['cat1', 'cat2', 'cat3', '대분류', '중분류', '소분류']
+
+        df = df.merge(classification_df, on=['cat1', 'cat2', 'cat3'], how='left')
+        df = df.drop(columns=['cat1', 'cat2', 'cat3'])
+
+        df = df.rename(columns={
+            '대분류': 'cat1',
+            '중분류': 'cat2',
+            '소분류': 'cat3'
+        })
+
+        # 텍스트 결합
+        columns_to_combine = ['addr1', 'cat1', 'cat2', 'cat3', 'contenttypeid', 'sigungucode', 'title', 'overview']
+        df['combined_text'] = df[columns_to_combine].fillna('').agg(' '.join, axis=1)
+
+        # 텍스트 정규화 함수
+        def normalize_text(text):
+            text = text.lower()
+            text = re_special_chars.sub('', text)  # 특수 문자 제거
+            text = re_multiple_spaces.sub(' ', text).strip()  # 불필요한 공백 제거
+            return text
+
+        # 정규화 적용
+        df['combined_text'] = df['combined_text'].apply(normalize_text)
+
+        # GPT API를 사용하여 overview 요약 생성 (비활성화)
+        # def summarize_overview(overview):
+        #     if pd.isna(overview) or not overview.strip():
+        #         return None  # 내용이 없을 경우 None 반환
+        #     try:
+        #         response = openai.ChatCompletion.create(
+        #             model="gpt-4o-mini",  # 저렴한 요약용 모델
+        #             messages=[{"role": "system", "content": "You are a helpful assistant that summarizes text."},
+        #                       {"role": "user", "content": f"Summarize this text: {overview}"}]
+        #         )
+        #         summary = response['choices'][0]['message']['content'].strip()
+        #         return summary
+        #     except Exception as e:
+        #         logger.error(f"Error summarizing overview: {e}")
+        #         return None
+
+        # overview 요약 컬럼 추가 (비활성화 상태)
+        # df['overview_summary'] = df['overview'].apply(summarize_overview)
+
+        print("Data preprocessing completed.")
+        
+        return df
+
+    except Exception as e:
+        print(f"Error fetching data from places_info: {e}")
+        return pd.DataFrame()
+    
 
 def collect_data():
     """
@@ -136,16 +240,8 @@ def collect_data():
     overviews = fetch_additional_overview(Config.SERVICE_KEY, Config.BASE_URL, df)
     if not overviews.empty:
         df = pd.merge(df, overviews, on='contentid', how='left')
-        # 주소
-        df['addr1'] = df['addr1'].fillna('정보 없음')
-        df['addr2'] = df['addr2'].fillna('정보 없음')
-
-        # 이미지
-        df['firstimage'] = df['firstimage'].fillna('이미지 미제공')
-        df['firstimage2'] = df['firstimage2'].fillna('이미지 미제공')
-
-        df['overview'] = df['overview'].fillna('정보 미제공')
-
+        df = process_data(df)
+        
     # 3. 데이터 저장
     try:
         save_to_db(df)

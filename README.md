@@ -43,10 +43,12 @@ Flask와 React를 사용한 웹 애플리케이션 프로젝트
 ```makefile
  FLASK_ENV=development
  SERVICE_KEY=YOUR_SERVICE_KEY
- DB_HOST=localhost
+ DB_HOST=your_host
  DB_USER=your_username
  DB_PASSWORD=your_password
- DB_NAME=tourism_db
+ DB_NAME=your_db_name
+ CORS_ALLOWED_ORIGINS=*
+ JOB_RUN=True
 ```
 
 **데이터베이스 설정**
@@ -59,4 +61,11 @@ Flask와 React를 사용한 웹 애플리케이션 프로젝트
 
 ```bash
  python run.py
+```
+
+or
+
+```bash
+ set FLASK_APP=run.py
+ flask run
 ```
