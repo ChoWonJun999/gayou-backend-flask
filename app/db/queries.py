@@ -26,9 +26,10 @@ CREATE TABLE IF NOT EXISTS places (
 """
 
 INSERT_OR_UPDATE_PLACE = """
-INSERT INTO places (contentid, title, addr1, addr2, cat1, cat2, cat3, contenttypeid, 
-                    firstimage, firstimage2, mapx, mapy, tel, overview)
-VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+INSERT INTO places (contentid, title, addr1, addr2, cat1, cat2, cat3, contenttypeid, sigungucode,
+                    overview, overview_summary, firstimage, firstimage2, cpyrhtDivCd, mapx, mapy, 
+                    mlevel, tel, zipcode, combined_text)
+VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
 ON DUPLICATE KEY UPDATE
 title=VALUES(title),
 addr1=VALUES(addr1),
@@ -37,12 +38,19 @@ cat1=VALUES(cat1),
 cat2=VALUES(cat2),
 cat3=VALUES(cat3),
 contenttypeid=VALUES(contenttypeid),
+sigungucode=VALUES(sigungucode),
+overview=VALUES(overview),
+overview_summary=VALUES(overview_summary),
 firstimage=VALUES(firstimage),
 firstimage2=VALUES(firstimage2),
+cpyrhtDivCd=VALUES(cpyrhtDivCd),
 mapx=VALUES(mapx),
 mapy=VALUES(mapy),
+mlevel=VALUES(mlevel),
 tel=VALUES(tel),
-overview=VALUES(overview);
+zipcode=VALUES(zipcode),
+combined_text=VALUES(combined_text),
+last_updated=CURRENT_TIMESTAMP;
 """
 
 SELECT_ALL_PLACES = """
