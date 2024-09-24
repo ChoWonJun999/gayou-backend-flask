@@ -6,6 +6,11 @@ from ..db import execute_query
 from ..db.queries import SELECT_ALL_PLACES
 from ..logging import setup_logging
 
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+import pandas as pd
+import json
+
 # 로그 설정
 logger = setup_logging()
 

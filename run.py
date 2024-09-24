@@ -11,11 +11,6 @@ from app.config.config import Config
 # .env 파일 로드
 load_dotenv()
 
-# 명령줄 인수 파싱 설정
-parser = argparse.ArgumentParser(description='Run Flask application with optional background scheduler.')
-parser.add_argument('-b', '--background', action='store_true', help='Run scheduler in background mode.')
-args = parser.parse_args()
-
 # Flask 애플리케이션 생성
 app = create_app()
 

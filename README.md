@@ -19,6 +19,7 @@ Flask와 React를 사용한 웹 애플리케이션 프로젝트
 ### 사전 요구 사항
 
 - Python 3.8
+- Node.js 및 npm
 - MySQL 데이터베이스
 
 ### 백엔드(Flask) 설정
@@ -37,24 +38,32 @@ Flask와 React를 사용한 웹 애플리케이션 프로젝트
  pip install -r requirements.txt
 ```
 
-**환경 변수 설정(.env)**
+**환경 변수 설정**
 
 ```makefile
  FLASK_ENV=development
  SERVICE_KEY=YOUR_SERVICE_KEY
  DB_HOST=your_host
- DB_USER=your_name
+ DB_USER=your_username
  DB_PASSWORD=your_password
  DB_NAME=your_db_name
+ CORS_ALLOWED_ORIGINS=*
+ JOB_RUN=True
 ```
 
 **데이터베이스 설정**
 
 ```sql
- CREATE DATABASE your_db_name;
+ CREATE DATABASE gayou;
 ```
 
 **Flask 서버 실행**
+
+```bash
+ python run.py
+```
+
+or
 
 ```bash
  set FLASK_APP=run.py

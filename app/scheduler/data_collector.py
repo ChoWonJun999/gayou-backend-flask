@@ -1,3 +1,4 @@
+import re
 import requests
 import pandas as pd
 import openai
@@ -91,7 +92,7 @@ def fetch_area_based_data(service_key, base_url):
         else:
             logger.warning("No more data available or response format changed.")
             break
-
+        
     if not all_items:
         logger.warning("No data collected from areaBasedList1 API.")
         return pd.DataFrame()  # 빈 데이터프레임 반환
@@ -154,7 +155,6 @@ def fetch_additional_overview(service_key, base_url, df):
                         'overview': item.get('overview', None)
                     }
                     data_list.append(data)
-
         except requests.RequestException as e:
             logger.error(f"HTTP request failed for content ID {content_id}: {e}")
             continue
