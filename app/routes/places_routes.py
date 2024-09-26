@@ -154,6 +154,7 @@ def get_places_by_similarity():
             'neighborhoods': neighborhoods,
             'selectedConcepts': selected_concepts
         }
+        
         places_data = fetch_places()
         df = pd.DataFrame(places_data)
 

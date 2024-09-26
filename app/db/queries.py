@@ -68,11 +68,8 @@ SELECT
     overview_summary,
     firstimage,
     firstimage2,
-    cpyrhtDivCd,
     mapx,
     mapy,
-    mlevel,
-    tel,
     zipcode,
     combined_text
 FROM places
