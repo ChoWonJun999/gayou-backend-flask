@@ -44,20 +44,22 @@ def save_to_db(df):
                 row.get('title', None),
                 row.get('addr1', None),
                 row.get('addr2', None),
-                row.get('areacode', None),
-                row.get('booktour', None),
                 row.get('cat1', None),
                 row.get('cat2', None),
                 row.get('cat3', None),
                 row.get('contenttypeid', None),
-                row.get('createdtime', None),
+                row.get('sigungucode', None),        # 시군구 코드 추가
+                row.get('overview', None),
+                row.get('overview_summary', None),   # 요약된 개요 추가
                 row.get('firstimage', None),
                 row.get('firstimage2', None),
+                row.get('cpyrhtDivCd', None),        # 저작권 코드 추가
                 row.get('mapx', None),
                 row.get('mapy', None),
-                row.get('modifiedtime', None),
+                row.get('mlevel', None),             # 지도 확대 수준 추가
                 row.get('tel', None),
-                row.get('overview', None)
+                row.get('zipcode', None),            # 우편번호 추가
+                row.get('combined_text', None)       # 전처리된 텍스트 추가
             ))
         conn.commit()
         cursor.close()

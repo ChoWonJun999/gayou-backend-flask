@@ -16,6 +16,9 @@ class Config:
     BASE_URL = "http://apis.data.go.kr/B551011/KorService1"
     SERVICE_KEY = os.getenv('SERVICE_KEY', 'your_default_service_key')
 
+    # openAI API 키
+    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
     # MySQL 데이터베이스 설정
     DB_HOST = os.getenv('DB_HOST', 'localhost')
     DB_USER = os.getenv('DB_USER', 'root')
