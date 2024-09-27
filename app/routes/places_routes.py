@@ -131,7 +131,6 @@ def recommend():
         recommended_course = create_course(recommended_df)
         content = {
             'town': region,
-            'courseName': '계족산에서 힐링 한 바가지 두 바가지',
             'data': recommended_course,
         }
         return jsonify(content), 200
