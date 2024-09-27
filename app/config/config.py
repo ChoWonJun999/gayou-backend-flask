@@ -49,4 +49,4 @@ class ProductionConfig(Config):
     """프로덕션 환경 설정"""
     DEBUG = False
     TESTING = False
-    CORS_ALLOWED_ORIGINS = ["https://your-frontend-domain.com"]  # 특정 도메인만 허용
+    CORS_ALLOWED_ORIGINS = [os.getenv('FRONTEND_DOMAIN', 'https://your-frontend-domain.com')]  # 특정 도메인만 허용

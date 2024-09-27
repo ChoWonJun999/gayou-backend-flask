@@ -1,9 +1,6 @@
 from app import create_app
 from app.scheduler.scheduler_controller import start_scheduler, stop_scheduler, is_scheduler_running
-import logging
-import argparse  # argparse 모듈 추가
-import os
-from dotenv import load_dotenv  # python-dotenv 사용하여 .env 파일 로드
+from dotenv import load_dotenv
 from app.logging import setup_logging
 import traceback
 from app.config.config import Config
@@ -25,7 +22,7 @@ def main():
 
     try:
         # Flask 애플리케이션 실행 - 디버그 모드와 reloader 비활성화
-        app.run(debug=True, threaded=True, use_reloader=False)
+        app.run(debug=True, threaded=True, use_reloader=False, host='0.0.0.0', port=5000)
         
     except Exception as e:
         # 오류 메시지와 트레이스백을 로그에 기록
