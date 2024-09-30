@@ -129,6 +129,7 @@ def recommend():
             return jsonify({"error": "No recommendations available"}), 404
 
         recommended_course = create_course(recommended_df)
+
         content = {
             'town': region,
             'data': recommended_course,
@@ -142,8 +143,12 @@ def recommend():
 
 @places_bp.route('/sort/', methods=['GET'])
 def get_places_by_similarity():
+    print(request.args)
     """Endpoint to sort places by similarity based on preferences."""
     try:
+        page = int(request.args.get('page', 1))
+        page_size = int(request.args.get('page_size', 10))
+        query = request.args.get('query', None)
         region = request.args.get('region')
         neighborhoods = request.args.getlist('neighborhoods[]')
         selected_concepts = request.args.getlist('selectedConcepts[]')
@@ -165,12 +170,30 @@ def get_places_by_similarity():
         if filtered_df.empty:
             return jsonify({"error": "No matching places found based on preference"}), 404
 
-        recommended_df = calculate_cosine_similarity(filtered_df, preference)
+        if query:
+            filtered_df = filtered_df[
+                filtered_df[['title', 'addr1', 'addr2']].apply(
+                    lambda row: row.astype(str).str.contains(query, case=False).any(), axis=1)
+            ]
+        
+        if filtered_df.empty:
+            recommended_df = pd.DataFrame()
+        else:
+            recommended_df = calculate_cosine_similarity(filtered_df, preference)
 
-        if recommended_df.empty:
-            return jsonify({"error": "No places found based on similarity"}), 404
+        total_items = len(recommended_df)
+        start_idx = (page - 1) * page_size
+        end_idx = start_idx + page_size
+        paginated_df = recommended_df.iloc[start_idx:end_idx]
 
-        return jsonify(recommended_df.to_dict(orient='records')), 200
+        response_data = {
+            "page": page,
+            "page_size": page_size,
+            "total_items": total_items,
+            "total_pages": (total_items // page_size) + (1 if total_items % page_size != 0 else 0),
+            "data": paginated_df.to_dict(orient='records')
+        }
+        return jsonify(response_data), 200
 
     except Exception as e:
         logger.error(f"Error during similarity query: {e}")
