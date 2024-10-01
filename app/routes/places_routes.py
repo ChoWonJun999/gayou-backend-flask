@@ -27,7 +27,7 @@ def fetch_places(limit=None):
 
 def filter_data_by_preference(df: pd.DataFrame, preference: dict) -> pd.DataFrame:
     """Filters the dataframe based on user preferences."""
-    region = preference.get("region")
+    region = preference.get("region", None)
     neighborhoods = preference.get("neighborhoods", [])
 
     if not region and not neighborhoods:
@@ -40,7 +40,7 @@ def filter_data_by_preference(df: pd.DataFrame, preference: dict) -> pd.DataFram
     
     if not neighborhoods:
         return df[df['addr1'].str.contains(region, case=False, na=False)].copy()
-
+    
     return df[
         (df['addr1'].str.contains(region, case=False, na=False)) |
         (df['addr2'].str.contains(neighborhoods_pattern, case=False, na=False))
@@ -75,25 +75,18 @@ def create_course(filtered_df: pd.DataFrame) -> list:
 
     if not other_df.empty:
         course.append(other_df.iloc[0].to_dict())
-        other_df = other_df.iloc[1:]
 
     if not restaurant_df.empty:
         course.append(restaurant_df.iloc[0].to_dict())
-        restaurant_df = restaurant_df.iloc[1:]
-    else:
-        if not other_df.empty:
-            course.append(other_df.iloc[0].to_dict())
-            other_df = other_df.iloc[1:]
+        
+    if not other_df.empty:
+        course.append(other_df.iloc[1].to_dict())
 
-    while len(course) < 5:
-        if not restaurant_df.empty:
-            course.append(restaurant_df.iloc[0].to_dict())
-            restaurant_df = restaurant_df.iloc[1:]
-        elif not other_df.empty:
-            course.append(other_df.iloc[0].to_dict())
-            other_df = other_df.iloc[1:]
-        else:
-            break
+    if not restaurant_df.empty:
+        course.append(restaurant_df.iloc[1].to_dict())
+        
+    if not other_df.empty:
+        course.append(other_df.iloc[2].to_dict())
 
     return course
 
@@ -102,16 +95,18 @@ def create_course(filtered_df: pd.DataFrame) -> list:
 def recommend():
     """Endpoint to recommend a course based on user preferences."""
     try:
-        region = request.args.get('region')
+        region = request.args.get('region', None)
         neighborhoods = request.args.getlist('neighborhoods[]')
         selected_concepts = request.args.getlist('selectedConcepts[]')
+        if neighborhoods == ['전체']:
+            neighborhoods = []
 
         preference = {
             'region': region,
             'neighborhoods': neighborhoods,
             'selectedConcepts': selected_concepts
         }
-
+        
         places_data = fetch_places()
         df = pd.DataFrame(places_data)
 
@@ -119,7 +114,7 @@ def recommend():
             return jsonify({"error": "No data available"}), 500
 
         filtered_df = filter_data_by_preference(df, preference)
-
+        
         if filtered_df.empty:
             return jsonify({"error": "No matching places found based on preference"}), 404
 
@@ -135,7 +130,6 @@ def recommend():
             'data': recommended_course,
         }
         return jsonify(content), 200
-
     except Exception as e:
         logger.error(f"Error during recommendation: {e}")
         return jsonify({"error": str(e)}), 500
@@ -143,15 +137,16 @@ def recommend():
 
 @places_bp.route('/sort/', methods=['GET'])
 def get_places_by_similarity():
-    print(request.args)
     """Endpoint to sort places by similarity based on preferences."""
     try:
         page = int(request.args.get('page', 1))
         page_size = int(request.args.get('page_size', 10))
         query = request.args.get('query', None)
-        region = request.args.get('region')
+        region = request.args.get('region', None)
         neighborhoods = request.args.getlist('neighborhoods[]')
         selected_concepts = request.args.getlist('selectedConcepts[]')
+        if neighborhoods == ['전체']:
+            neighborhoods = []
 
         preference = {
             'region': region,
