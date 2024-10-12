@@ -66,27 +66,18 @@ def calculate_cosine_similarity(filtered_df: pd.DataFrame, preference: dict) -> 
     return filtered_df.sort_values(by='similarity', ascending=False)
 
 
-def create_course(filtered_df: pd.DataFrame) -> list:
+def create_course(filtered_df: pd.DataFrame, retry) -> list:
     """Creates a travel course based on the highest similarity scores."""
     course = []
 
     restaurant_df = filtered_df[filtered_df['cat1'] == '음식']
     other_df = filtered_df[filtered_df['cat1'] != '음식']
 
-    if not other_df.empty:
-        course.append(other_df.iloc[0].to_dict())
-
-    if not restaurant_df.empty:
-        course.append(restaurant_df.iloc[0].to_dict())
-        
-    if not other_df.empty:
-        course.append(other_df.iloc[1].to_dict())
-
-    if not restaurant_df.empty:
-        course.append(restaurant_df.iloc[1].to_dict())
-        
-    if not other_df.empty:
-        course.append(other_df.iloc[2].to_dict())
+    course.append(other_df.iloc[(3 * retry) % len(other_df)].to_dict())
+    course.append(restaurant_df.iloc[(3 * retry) % len(restaurant_df)].to_dict())
+    course.append(other_df.iloc[(3 * retry + 1) % len(other_df)].to_dict())
+    course.append(restaurant_df.iloc[(3 * retry + 1) % len(restaurant_df)].to_dict())
+    course.append(other_df.iloc[(3 * retry + 2) % len(other_df)].to_dict())
 
     return course
 
@@ -98,6 +89,8 @@ def recommend():
         region = request.args.get('region', None)
         neighborhoods = request.args.getlist('neighborhoods[]')
         selected_concepts = request.args.getlist('selectedConcepts[]')
+        retry = int(request.args.get('rec', None))
+        
         if neighborhoods == ['전체']:
             neighborhoods = []
 
@@ -123,7 +116,7 @@ def recommend():
         if recommended_df.empty:
             return jsonify({"error": "No recommendations available"}), 404
 
-        recommended_course = create_course(recommended_df)
+        recommended_course = create_course(recommended_df, retry)
 
         content = {
             'town': region,
